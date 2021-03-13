@@ -4,14 +4,17 @@ YAMLNav is simple utility that let you search through yaml file by path with fuz
 under the cursor.
 ## Features
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+**Search**
 
-For example if there is an image subfolder under your extension project workspace:
+Find a specific key by search by the entire path.
 
-\!\[feature X\]\(images/feature-x.png\)
+![YAMLNav Search](images/search.gif)
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+**Copy**
 
+Copy the path under the cursor.
+
+![YAMLNav Copy](images/copy.gif)
 ## Requirements
 
 Right now use the yaml-path binary to parse and extract paths. The binary need to be installed with the following command.
