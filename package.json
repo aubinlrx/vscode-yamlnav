@@ -2,7 +2,7 @@
 	"name": "yamlnav",
 	"displayName": "YAMLNav",
 	"description": "Navigate through YAML keys",
-	"version": "0.0.3",
+	"version": "0.0.6",
 	"engines": {
 		"vscode": "^1.54.0"
 	},
@@ -33,11 +33,14 @@
 		"pretest": "npm run lint",
 		"test": "node ./test/runTest.js"
 	},
+	"dependencies": {
+		"yaml": "^2.0.0-4"
+	},
 	"devDependencies": {
-		"@types/vscode": "^1.54.0",
 		"@types/glob": "^7.1.3",
 		"@types/mocha": "^8.0.4",
 		"@types/node": "^12.11.7",
+		"@types/vscode": "^1.54.0",
 		"eslint": "^7.19.0",
 		"glob": "^7.1.6",
 		"mocha": "^8.2.1",

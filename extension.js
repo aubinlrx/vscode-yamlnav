@@ -1,12 +1,13 @@
-const vscode = require('vscode');
-const cp = require('child_process')
+const vscode = require('vscode')
 const path = require('path')
+const fs = require('fs')
+const { list, copy } = require('./src/yaml-path')
 
 /**
  * @param {vscode.ExtensionContext} context
  */
 function activate(context) {
-  let search = vscode.commands.registerTextEditorCommand('yamlnav.search', function (editor) {
+  let searchPaths = vscode.commands.registerTextEditorCommand('yamlnav.search', function (editor) {
     const file = editor.document.fileName
 
     if (path.extname(file) !== '.yml') {
@@ -14,36 +15,25 @@ function activate(context) {
       return
     }
 
-    const command = `yaml-path list ${file} -l`
-    console.log(command)
-    cp.exec(command, (error, stdout) => {
-      const results = stdout.split('\n')
-      const values = {}
+    const content = fs.readFileSync(file, 'utf8')
+    const results = list(content)
 
-      results.forEach((value) => {
-        let [path, lineNumber] = value.split(' ')
-        if (!lineNumber) return
+    vscode.window.showQuickPick(results.map(item => item.path))
+      .then(selected => {
+        if (!selected) return
 
-        values[path] = Number(lineNumber.split('#')[1]) - 1
+        const lineNumber = results.find(item => item.path === selected).line.line - 1
+        const line = editor.document.lineAt(lineNumber)
+        const characterIndex = line.firstNonWhitespaceCharacterIndex
+
+        const position = new vscode.Position(lineNumber, characterIndex)
+        editor.selections = [new vscode.Selection(position,position)];
+        const range = new vscode.Range(position, position);
+        editor.revealRange(range);
       })
-
-      vscode.window.showQuickPick(Object.keys(values))
-        .then(selected => {
-          if (!selected) return
-
-          const lineNumber = values[selected]
-          const line = editor.document.lineAt(lineNumber)
-          const characterIndex = line.firstNonWhitespaceCharacterIndex
-
-          const position = new vscode.Position(lineNumber, characterIndex)
-          editor.selections = [new vscode.Selection(position,position)];
-          const range = new vscode.Range(position, position);
-          editor.revealRange(range);
-        })
-     })
   });
 
-  let copy = vscode.commands.registerTextEditorCommand('yamlnav.copy', function(editor) {
+  let copyPath = vscode.commands.registerTextEditorCommand('yamlnav.copy', function(editor) {
     const file = editor.document.fileName
 
     if (path.extname(file) !== '.yml') {
@@ -51,18 +41,15 @@ function activate(context) {
       return
     }
 
-    const lineNumber = editor.selection.active.line
-    const line = editor.document.lineAt(lineNumber)
-    const character = line.firstNonWhitespaceCharacterIndex
+    const lineNumber = editor.selection.active.line + 1
+    const content = fs.readFileSync(file, 'utf8')
+    const nodePath = copy(content, lineNumber)
 
-    const command = `yaml-path get ${file} -c ${character + 1} -l ${lineNumber + 1}`
-    cp.exec(command, (error, stdout) => {
-      vscode.env.clipboard.writeText(stdout)
-      vscode.window.showInformationMessage(stdout)
-    })
+    vscode.env.clipboard.writeText(nodePath.path)
+    vscode.window.showInformationMessage(nodePath.path)
   });
 
-  context.subscriptions.push(search, copy);
+  context.subscriptions.push(searchPaths, copyPath);
 }
 
 // this method is called when your extension is deactivated
