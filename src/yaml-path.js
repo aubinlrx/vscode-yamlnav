@@ -19,17 +19,18 @@ function parse(content) {
 
 function displayNodes(items, parent, results, { lineCounter }) {
   items.forEach((item) => {
+    let base = (!item.key) ? item : item.key;
 
     let nextParent = {
       path: null,
-      range: item.key.range,
-      line: lineCounter.linePos(item.key.range[0])
+      range: base.range,
+      line: lineCounter.linePos(base.range[0])
     }
 
     if (!parent) {
-      nextParent.path = item.key.value
+      nextParent.path = base.value
     } else {
-      nextParent.path = `${parent.path}.${item.key.value}`
+      nextParent.path = `${parent.path}.${base.value}`
     }
 
     results.push(nextParent)
